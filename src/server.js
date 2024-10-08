@@ -42,7 +42,7 @@ export const setupServer = () => {
         if(contactId.length != 24) {
             return res.status(403).json({
                 status: 403,
-                message: 'The length of the ID must be 24 characters'
+                message: 'The length of the ID must be 24 character'
             });
         }
 
