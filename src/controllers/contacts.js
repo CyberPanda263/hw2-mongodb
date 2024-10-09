@@ -1,8 +1,14 @@
 import createError from "http-errors";
 import { addContact, deleteContactById, getAllContacts, getContactByID, patchContactById } from "../services/contacts.js";
+import { isValidObjectId } from "mongoose";
+import createHttpError from "http-errors";
+import { paginationValidateParams } from "../validations/paginationValidateParams.js";
+import { parsingSortParams } from "../validations/parsingSortParams.js";
 
 export const getContactsAllController = async (req, res) => {
-    const contacts = await getAllContacts();
+    const {page, perPage} = paginationValidateParams(req.query);
+    const {sortBy, sortOrder} = parsingSortParams(req.query);
+    const contacts = await getAllContacts({page, perPage, sortBy, sortOrder});
         res.status(200).json({
         status: 200,
         message: "Successfully found contacts!",
@@ -12,7 +18,7 @@ export const getContactsAllController = async (req, res) => {
 
 export const getContact = async (req, res, next) => {
     const { contactId } = req.params;
-    
+
     const contact = await getContactByID(contactId);
 
     if (!contact) return next(createError(404, `Contact not found`));
@@ -39,7 +45,7 @@ export const addContactController = async (req, res) => {
 export const patchContactByIdController = async (req, res) => {
     const contactID = req.params.contactId;
     const body = req.body;
-    
+
     const patchedContact = await patchContactById(contactID, body);
 
     res.status(200).json({
