@@ -5,10 +5,13 @@ import { isValidId } from '../middlewares/isValidId.js';
 import { validateBody } from '../middlewares/validateBody.js';
 import { addContactValidationShema } from '../validations/addContactValidationShema.js';
 import { patchContactValidationShema } from '../validations/patchContactVakidationShema.js';
+import { authentificate } from '../middlewares/authentificate.js';
 
 const contactRouter = Router();
 
 contactRouter.use('/:contactId', isValidId("contactId"));
+
+contactRouter.use('/', authentificate);
 
 contactRouter.get('/', ctrlWrapper(getContactsAllController));
 

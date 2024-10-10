@@ -2,11 +2,11 @@ import createHttpError from "http-errors";
 import { contactsModel } from "../db/models/contact.js";
 import { createPaginationData } from "../utils/createPaginationData.js";
 
-export const getAllContacts = async ({ page = 1, perPage = 4, sortBy = 'asc', sortOrder = 'name' }) => {
+export const getAllContacts = async ({ page = 1, perPage = 4, sortBy = 'asc', sortOrder = 'name' }, userId) => {
     const skip = (page -1) * perPage;
     const [count, contacts] = await Promise.all([
-        contactsModel.countDocuments(),
-        contactsModel.find().skip(skip).limit(perPage).sort({
+        contactsModel.countDocuments({userId: userId}),
+        contactsModel.find({userId: userId}).skip(skip).limit(perPage).sort({
             [sortBy]: sortOrder
         }),
     ]);
@@ -20,18 +20,18 @@ export const getAllContacts = async ({ page = 1, perPage = 4, sortBy = 'asc', so
     };
 };
 
-export const getContactByID = async (contactID) => {
-    const contact = await contactsModel.findById(contactID);
+export const getContactByID = async (contactID, userId) => {
+    const contact = await contactsModel.find({userId: userId, _id: contactID});
     return contact;
 };
 
-export const addContact = async (contact) => {
-    const newContact = await contactsModel.create(contact);
+export const addContact = async (contact, userId) => {
+    const newContact = await contactsModel.create({...contact, userId});
     return newContact;
 };
 
-export const patchContactById = async (contactID, pachedData) => {
-    const pachedContact = await contactsModel.findByIdAndUpdate(contactID, pachedData, {
+export const patchContactById = async (contactID, pachedData, userId) => {
+    const pachedContact = await contactsModel.findOneAndUpdate({userId: userId, _id: contactID}, pachedData, {
         new: true,
     });
 
@@ -45,8 +45,8 @@ export const patchContactById = async (contactID, pachedData) => {
     return pachedContact;
 };
 
-export const deleteContactById = async (contactID) => {
-    const deletcontact = await contactsModel.findByIdAndDelete(contactID);
+export const deleteContactById = async (contactID, userId) => {
+    const deletcontact = await contactsModel.findOneAndDelete({userId: userId, _id: contactID});
 
     if(!deletcontact) {
         throw createHttpError(404, {
