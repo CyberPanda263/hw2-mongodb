@@ -11,6 +11,10 @@ export const getAllContacts = async ({ page = 1, perPage = 4, sortBy = 'asc', so
         }),
     ]);
 
+    if(count === 0) {
+        return false;
+    }
+
     return {
         data: contacts,
         page: page,
