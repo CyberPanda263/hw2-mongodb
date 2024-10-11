@@ -1,5 +1,5 @@
 import { createCookies } from "../constans/createCookies.js";
-import { loginUser, logoutUser, refreshSession, registerUser } from "../services/auth.js";
+import { loginUser, logoutUser, refreshSession, registerUser, reqResetToken, resetPassword } from "../services/auth.js";
 
 export const registerController = async (req, res) => {
     const { body } = req;
@@ -49,5 +49,25 @@ export const refreshUserController = async (req, res) => {
         status: 200,
         message: 'Successfully is refreshed!',
         data: {accessToken: session.accessToken}
+    });
+};
+
+export const reqResetTokenController = async (req, res) => {
+    await reqResetToken(req.body.email);
+
+    res.json({
+        status: 200,
+       message: "Reset password email has been successfully sent.",
+       data: {}
+    });
+};
+
+export const resetPasswordController = async (req, res) => {
+    await resetPassword(req.body);
+
+    res.json({
+        status: 200,
+        message: "Password has been successfully reset.",
+        data: {}
     });
 };

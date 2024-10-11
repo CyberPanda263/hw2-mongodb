@@ -10,6 +10,9 @@ const contactSchema = new Schema(
             type: String,
             require: true
         },
+        photo: {
+            type: String,
+        },
         phoneNumber: {
             type: String,
             require: true

@@ -2,6 +2,9 @@ import createError from "http-errors";
 import { addContact, deleteContactById, getAllContacts, getContactByID, patchContactById } from "../services/contacts.js";
 import { paginationValidateParams } from "../validations/paginationValidateParams.js";
 import { parsingSortParams } from "../validations/parsingSortParams.js";
+import { saveFileToUploadDir } from "../utils/saveFileToUploadDir.js";
+import { saveFileToCloundinary } from "../utils/saveFileToCloundinary.js";
+import { env } from "../utils/env.js";
 
 export const getContactsAllController = async (req, res) => {
     const {page, perPage} = paginationValidateParams(req.query);
@@ -40,8 +43,19 @@ export const getContact = async (req, res, next) => {
 export const addContactController = async (req, res) => {
     const contact = req.body;
     const userId = req.user._id;
+    const photo = req.file;
 
-    const neewContact = await addContact(contact, userId);
+    let photoUrl;
+
+    if(photo) {
+        if(env('ENABLE_CLOUDINARY') === 'true') {
+            photoUrl = await saveFileToCloundinary(photo);
+        } else {
+            photoUrl = await saveFileToUploadDir(photo);
+        }
+    }
+
+    const neewContact = await addContact({...contact, photo: photoUrl}, userId);
 
     res.status(201).json({
         status: 201,
@@ -54,7 +68,18 @@ export const patchContactByIdController = async (req, res) => {
     const contactID = req.params.contactId;
     const body = req.body;
     const userId = req.user._id;
-    const patchedContact = await patchContactById(contactID, body, userId);
+    const photo = req.file;
+
+    let photoUrl;
+    if(photo) {
+        if(env('ENABLE_CLOUDINARY') === 'true') {
+            photoUrl = await saveFileToCloundinary(photo);
+        } else {
+            photoUrl = await saveFileToUploadDir(photo);
+        }
+    }
+
+    const patchedContact = await patchContactById(contactID, {...body, photo: photoUrl}, userId);
 
     res.status(200).json({
         status: 200,
